@@ -5,13 +5,6 @@ Bundler.require(:default)
 DATABASE_NAME = 'sql_bootcamp'
 DATABASE = Sequel.connect("mysql2://root@localhost/#{DATABASE_NAME}")
 
-#| BUSINESSES               |              | COMPUTERS   |         | EVENTS      |              |
-#| id                       | int          | id          | int     | id          | int          |
-#| name                     | varchar(255) | active      | tinyint | computer_id | int          |
-#| business_relationship_id | int          | business_id | int     | occurred_at | datetime     |
-#|                          |              |             |         | type        | varchar(255) |
-#|                          |              |             |         | data        | text         |
-
 namespace :db do
   def pipe_to_mysql(command)
     `echo "#{command}" | mysql -u root`

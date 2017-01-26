@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    concurrent-ruby (1.0.4)
     ffaker (2.4.0)
     mysql2 (0.4.5)
     rake (12.0.0)
@@ -10,6 +11,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  concurrent-ruby
   ffaker
   mysql2
   rake
