@@ -3,6 +3,7 @@ require 'bundler'
 Bundler.require(:default)
 
 DATABASE_NAME = 'sql_bootcamp'
+DATABASE = Sequel.connect("mysql2://root@localhost/#{DATABASE_NAME}")
 
 #| BUSINESSES               |              | COMPUTERS   |         | EVENTS      |              |
 #| id                       | int          | id          | int     | id          | int          |
@@ -29,18 +30,20 @@ namespace :db do
   desc "Run migrations"
   task :migrate, [:version] do |t, args|
     Sequel.extension :migration
-    db = Sequel.connect("mysql2://root@localhost/#{DATABASE_NAME}")
 
     if args[:version]
       puts "Migrating to version #{args[:version]}"
-      Sequel::Migrator.run(db, "db/migrations", target: args[:version].to_i)
+      Sequel::Migrator.run(DATABASE, "db/migrations", target: args[:version].to_i)
     else
       puts "Migrating to latest"
-      Sequel::Migrator.run(db, "db/migrations")
+      Sequel::Migrator.run(DATABASE, "db/migrations")
     end
   end
 
-  task :reset => [:drop, :create, :migrate] do
-
+  task :seed do
+    require_relative 'db/seeds.rb'
   end
+
+  desc "drop, create and migrate the database"
+  task :reset => [:drop, :create, :migrate, :seed]
 end
