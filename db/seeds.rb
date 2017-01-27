@@ -12,7 +12,7 @@ class Seeds
 
   def run
     100.times { create_business }
-    10_000.times { create_computer }
+    500.times { create_computer }
     25_000.times { create_event }
   ensure
     @threads.map(&:join)
