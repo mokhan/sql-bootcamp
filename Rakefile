@@ -1,9 +1,11 @@
 require 'rubygems'
 require 'bundler'
+require 'logger'
 Bundler.require(:default)
 
 DATABASE_NAME = 'sql_bootcamp'
 DATABASE = Sequel.connect("mysql2://root@localhost/#{DATABASE_NAME}")
+DATABASE.loggers << Logger.new($stdout)
 
 namespace :db do
   def pipe_to_mysql(command)
