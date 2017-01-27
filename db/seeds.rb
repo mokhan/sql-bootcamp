@@ -1,28 +1,50 @@
 require 'json'
 require 'prime'
 
-pool = Concurrent::FixedThreadPool.new(10)
-event_types = (1..5).to_a
+class Seeds
+  attr_reader :database, :event_types
 
-10.times do
-  business_id = DATABASE[:businesses].insert(name: FFaker::Company.name, business_relationship_id: rand(3))
-  puts "Created business: #{business_id}"
+  def initialize(database)
+    @database = database
+    @event_types = (1..5).to_a
+    @threads = []
+  end
 
-  pool.post do
-    rand(100).times do |n|
-      computer_id = DATABASE[:computers].insert(active: rand(100).even?, business_id: business_id.prime? ? business_id * 42 : business_id)
-      puts "Created computer: #{computer_id} on #{Thread.current.object_id}"
-
-      rand(50).times do
-        data = JSON.generate({
-          ip_address: FFaker::Internet.ip_v4_address,
-          mac: FFaker::Internet.mac,
-          url: FFaker::Internet.http_url,
-        })
-        DATABASE[:events].insert(computer_id: computer_id, occurred_at: DateTime.parse(FFaker::Time.datetime), type: event_types.sample, data: data)
+  def run
+    10.times do
+      background_thread do
+        rand(100).times do
+          rand(50).times do
+            puts "creating"
+            database[:events].insert(
+              computer_id: create_computer(business_id: create_business(name: FFaker::Company.name)),
+              occurred_at: DateTime.parse(FFaker::Time.datetime),
+              type: event_types.sample,
+              data: JSON.generate({
+                ip_address: FFaker::Internet.ip_v4_address,
+                mac: FFaker::Internet.mac,
+                url: FFaker::Internet.http_url,
+              })
+            )
+          end
+        end
       end
     end
+  ensure
+    @threads.map(&:join)
+  end
+
+  private
+
+  def background_thread(&block)
+    @threads << Thread.new(&block)
+  end
+
+  def create_computer(active: rand(100).even?, business_id:)
+    database[:computers].insert(active: active, business_id: business_id)
+  end
+
+  def create_business(name:)
+    database[:businesses].insert(name: name, business_relationship_id: rand(3))
   end
 end
-
-pool.wait_for_termination

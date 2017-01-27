@@ -35,6 +35,7 @@ namespace :db do
 
   task :seed do
     require_relative 'db/seeds.rb'
+    Seeds.new(DATABASE).run
   end
 
   desc "drop, create and migrate the database"
